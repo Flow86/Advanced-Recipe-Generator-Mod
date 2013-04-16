@@ -34,8 +34,14 @@
 
 	<!-- Targets -->
 
+	<!-- Clear build directory -->
+	<target name="clean">
+		<delete file="jenkins.properties" failonerror="false" />
+		<delete dir="${build.dir}"/>
+	</target>
+
 	<!-- Set full version -->
-	<target name="initialize-version" depends="version-provided,version-not-provided">
+	<target name="initialize-version" depends="version-provided,version-not-provided,git.revision">
 		<property name="arg.version.full"     value="${arg.version}.${build.number}"/>
 		<echo message="Building ${ant.project.name} ${arg.version.full} with Forge ${forge.version}"/>
 		
@@ -48,28 +54,9 @@
 		</propertyfile>
 	</target>
 
-	<!-- Clear build directory -->
-	<target name="clean">
-		<delete dir="${build.dir}"/>
-	</target>
-
-	<!-- Set full version -->
-	<target name="initialize-version" depends="version-provided,version-not-provided,git.revision">
-		<property name="bc.version.full" value="${bc.version}.${build.number}"/>
-
-		<delete file="jenkins.properties" failonerror="false" />
-		<propertyfile file="jenkins.properties">
-			<entry key="BC_VERSION_FULL" value="${bc.version.full}" />
-			<entry key="BC_VERSION" value="${bc.version}" />
-			<entry key="MC_VERSION" value="${mc.version}" />
-			<entry key="MCP_VERSION" value="${mcp.version}" />
-			<entry key="FORGE_VERSION" value="${forge.version}" />
-		</propertyfile>
-	</target>
-
 	<!-- Set unknown build number -->
 	<target name="version-not-provided" unless="env.BUILD_NUMBER">
-		<property name="build.number" value="unknown"/>
+		<property name="build.number" value="custom"/>
 	</target>
 
 	<!-- Set build number from environment -->
@@ -120,41 +107,9 @@
 		</exec>
 
 	</target>	
-	
-	<!-- Set unknown build number -->
-	<target name="version-not-provided" unless="env.BUILD_NUMBER">
-		<property name="build.number" value="custom"/>
-	</target>
-
-	<!-- Set build number from environment -->
-	<target name="version-provided" if="env.BUILD_NUMBER">
-		<property name="build.number" value="${env.BUILD_NUMBER}"/>
-	</target>
-
-	<!-- Clean -->
-	<target name="clean">
-		<delete file="jenkins.properties" failonerror="false" />
-		<delete dir="${build.dir}"/>
-	</target>
-
-	<!-- Setup -->
-	<target name="setup" depends="initialize-version">
-		
-		<!-- Update MD5 otherwise we get all the buildcraft classes too :/ -->
-		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows" failonerror="true">
-			<arg line="/c"/>
-			<arg line="updatemd5.bat"/>
-			<arg line="--force"/>
-		</exec>
-
-		<exec dir="${mcp.dir}" executable="sh" osfamily="unix" failonerror="true">
-			<arg line="updatemd5.sh"/>
-			<arg line="--force"/>
-		</exec>
-	</target>
 
 	<!-- Copy source for use in eclipse to debug -->
-	<target name="copy-src-eclipse" depends="BuildCraft.copy-src">
+	<target name="copy-src-eclipse">
 		<echo message="Installing ARG source for Eclipse"/>
 
 		<!-- Copy ARG source -->

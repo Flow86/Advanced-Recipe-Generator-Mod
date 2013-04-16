@@ -35,7 +35,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import buildcraft.core.utils.StringUtil;
+import cpw.mods.fml.common.registry.LanguageRegistry;
 
 class RenderRecipe extends GuiContainer {
 	public String name;
@@ -159,7 +159,7 @@ class RenderRecipe extends GuiContainer {
 	public void drawGuiContainerForegroundLayer(int i, int j) {
 		super.drawGuiContainerForegroundLayer(i, j);
 
-		String title = StringUtil.localize(getCraftingContainer().craftResult.getStackInSlot(0).getDisplayName());
+		String title = LanguageRegistry.instance().getStringLocalization(getCraftingContainer().craftResult.getStackInSlot(0).getDisplayName());
 		fontRenderer.drawString(title, getCenteredOffset(title, xSize), 5, 0x404040);
 
 		float scale = 3 / 4F;
