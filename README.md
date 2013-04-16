@@ -1,6 +1,6 @@
 # Advanced Recipe Generator
 
-   ![Advanced Recipe Generator](resources/arg-logo.png "Advanced Recipe Generator")
+   ![Advanced Recipe Generator](common/arg/logo.png "Advanced Recipe Generator")
 
    Download Links:   http://www.siedler25.org/uploads/minecraft/AdvancedRecipeGenerator/
 
