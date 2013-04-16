@@ -88,7 +88,7 @@
 	</target>
 
 	<!-- Setup mcp and forge -->
-	<target name="setup" depends="download-files"><!-- if="out-of-date"-->
+	<target name="setup" depends="initialize-version,download-files"><!-- if="out-of-date"-->
 
 		<delete dir="${forge.dir}" failonerror="false"/>
 
