@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
@@ -24,6 +25,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
@@ -48,6 +51,16 @@ class Render extends GuiContainer {
 		this.name = name;
 		mc = Minecraft.getMinecraft();
 		fontRenderer = mc.fontRenderer;
+
+		if (TileEntityRenderer.instance.renderEngine == null) {
+			TileEntityRenderer.instance.renderEngine = mc.renderEngine;
+			Iterator iterator = TileEntityRenderer.instance.specialRendererMap.values().iterator();
+
+			while (iterator.hasNext()) {
+				TileEntitySpecialRenderer tileentityspecialrenderer = (TileEntitySpecialRenderer) iterator.next();
+				tileentityspecialrenderer.setTileEntityRenderer(TileEntityRenderer.instance);
+			}
+		}
 
 		xSize = 176;
 		ySize = 155;
@@ -118,7 +131,6 @@ class Render extends GuiContainer {
 			s = "" + itemstack.stackSize;
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		this.mc.renderEngine.bindTexture("/terrain.png");
 		itemRenderer.renderItemAndEffectIntoGUI(fontRenderer, mc.renderEngine, itemstack, x, y);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, mc.renderEngine, itemstack, x, y, s);
 

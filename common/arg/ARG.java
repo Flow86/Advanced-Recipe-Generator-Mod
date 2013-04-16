@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
@@ -51,7 +50,7 @@ public class ARG {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
-	public static boolean[] mapLoaded = { false, false };
+	public static int[] mapLoaded = { 0, 0 };
 	public static boolean mapGenerated = false;
 
 	@ForgeSubscribe(priority = EventPriority.LOWEST)
@@ -59,20 +58,23 @@ public class ARG {
 	public void createRecipeImages(TextureStitchEvent.Post evt) {
 
 		if (evt.map == Minecraft.getMinecraft().renderEngine.textureMapBlocks)
-			mapLoaded[0] = true;
+			mapLoaded[0]++;
 		if (evt.map == Minecraft.getMinecraft().renderEngine.textureMapItems)
-			mapLoaded[1] = true;
+			mapLoaded[1]++;
 
-		if (mapLoaded[0] && mapLoaded[1]) {
+		System.out.println("mapLoaded: " + mapLoaded[0] + ", " + mapLoaded[1] + " => " + mapGenerated);
+
+		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1]) {
 			if (mapGenerated)
 				return;
 			mapGenerated = true;
 
+			System.out.println("Generating Recipes!");
+
 			int position = evt.map.getTexture().getTextureData().position();
 			ByteBuffer buff = evt.map.getTexture().getTextureData().duplicate();
-			evt.map.getTexture().uploadTexture();
 
-			Block.chest.registerIcons(Minecraft.getMinecraft().renderEngine.textureMapBlocks);
+			evt.map.getTexture().uploadTexture();
 
 			for (Object orecipe : CraftingManager.getInstance().getRecipeList()) {
 				IRecipe irecipe = (IRecipe) orecipe;
