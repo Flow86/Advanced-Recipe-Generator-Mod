@@ -1,26 +1,126 @@
-<project name="Additional-Buildcraft-Objects" basedir="../" default="main">
+<project name="Advanced-Recipe-Generator" basedir="../" default="main">
 	<property environment="env" />
 
-	<property name="abo.version"            value="1.0.3"/>
-	<property name="abo.dir"                value="Additional-Buildcraft-Objects"/>
+	<property name="arg.version"            value="0.0.1"/>
+	<property name="arg.dir"                value="Advanced-Recipe-Generator"/>
 	
-	<import file="../BuildCraft/build.xml" as="BuildCraft"/>
-	
+	<property name="build.dir" value="build"/>
+	<property name="download.dir" value="download"/>
+	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="jar.dir" value="bin"/>
+
+	<property name="forge.dir" value="${build.dir}/forge"/>
+	<property name="mcp.dir" value="${forge.dir}/mcp"/>
+	<property name="mcpsrc.dir" value="${mcp.dir}/src"/>
+
+	<property name="mc.version" value="1.5.1"/>
+	<property name="forge.version" value="7.7.1.650"/>
+
+	<property name="forge.name" value="minecraftforge-src-${mc.version}-${forge.version}.zip"/>
+
+	<available property="forge-exists" file="${download.dir}/${forge.name}"/>
+	<available file="${src.dir}/.git" type="dir" property="git.present"/>
+
+	<condition property="out-of-date">
+		<not>
+			<and>
+				<available file="${download.dir}/${forge.name}"/>
+				<available file="${mcpsrc.dir}"/>
+			</and>
+		</not>
+	</condition>
+
+	<mkdir dir="${download.dir}"/>
+
+	<!-- Targets -->
+
 	<!-- Set full version -->
-	<target name="initialize-version" depends="BuildCraft.initialize-version,version-provided,version-not-provided">
-		<property name="abo.version.full"     value="${abo.version}.${build.number}"/>
-		<echo message="Building ${ant.project.name} ${abo.version.full} with Forge ${forge.version} and BuildCraft ${bc.version}"/>
+	<target name="initialize-version" depends="version-provided,version-not-provided">
+		<property name="arg.version.full"     value="${arg.version}.${build.number}"/>
+		<echo message="Building ${ant.project.name} ${arg.version.full} with Forge ${forge.version}"/>
 		
 		<delete file="jenkins.properties" failonerror="false" />
 		<propertyfile file="jenkins.properties">
-			<entry key="ABO_VERSION_FULL" value="${abo.version.full}" />
+			<entry key="ARG_VERSION_FULL" value="${arg.version.full}" />
 			<entry key="MC_VERSION" value="${mc.version}" />
 			<entry key="MCP_VERSION" value="${mcp.version}" />
-			<entry key="BC_VERSION" value="${bc.version}" />
 			<entry key="FORGE_VERSION" value="${forge.version}" />
 		</propertyfile>
 	</target>
 
+	<!-- Clear build directory -->
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<!-- Set full version -->
+	<target name="initialize-version" depends="version-provided,version-not-provided,git.revision">
+		<property name="bc.version.full" value="${bc.version}.${build.number}"/>
+
+		<delete file="jenkins.properties" failonerror="false" />
+		<propertyfile file="jenkins.properties">
+			<entry key="BC_VERSION_FULL" value="${bc.version.full}" />
+			<entry key="BC_VERSION" value="${bc.version}" />
+			<entry key="MC_VERSION" value="${mc.version}" />
+			<entry key="MCP_VERSION" value="${mcp.version}" />
+			<entry key="FORGE_VERSION" value="${forge.version}" />
+		</propertyfile>
+	</target>
+
+	<!-- Set unknown build number -->
+	<target name="version-not-provided" unless="env.BUILD_NUMBER">
+		<property name="build.number" value="unknown"/>
+	</target>
+
+	<!-- Set build number from environment -->
+	<target name="version-provided" if="env.BUILD_NUMBER">
+		<property name="build.number" value="${env.BUILD_NUMBER}"/>
+	</target>
+	
+	<target name="git.revision" if="git.present">
+		<exec executable="git" dir="${src.dir}" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+			<arg value="describe"/>
+			<arg value="--tags"/>
+			<arg value="--always"/>
+			<arg value="HEAD"/>
+		</exec>
+		<condition property="arg.version" value="${git.revision}" else="0.0.0">
+			<and>
+				<isset property="git.revision"/>
+				<length string="${git.revision}" trim="yes" length="0" when="greater"/>
+			</and>
+		</condition>
+	</target>	
+
+	<!-- Download necessary files -->
+	<target name="download-files" depends="download-forge"/>
+
+	<!-- Download forge (if it doesn't exist) -->
+	<target name="download-forge" unless="forge-exists">
+		<get src="http://files.minecraftforge.net/${forge.name}" dest="${download.dir}" usetimestamp="True"/>
+	</target>
+
+	<!-- Setup mcp and forge -->
+	<target name="setup" depends="download-files"><!-- if="out-of-date"-->
+
+		<delete dir="${forge.dir}" failonerror="false"/>
+
+		<unzip dest="${forge.dir}/.." src="${download.dir}/${forge.name}"/>
+
+		<!-- Fix executable permissions -->
+		<chmod dir="${forge.dir}" perm="ugo+rx" includes="**.sh"/>
+
+		<!-- Install forge -->
+		<exec dir="${forge.dir}" executable="cmd" osfamily="windows">
+			<arg line="/c install.cmd"/>
+		</exec>
+
+		<exec dir="${forge.dir}" executable="sh" osfamily="unix">
+			<arg value="install.sh"/>
+		</exec>
+
+	</target>	
+	
 	<!-- Set unknown build number -->
 	<target name="version-not-provided" unless="env.BUILD_NUMBER">
 		<property name="build.number" value="custom"/>
@@ -32,12 +132,13 @@
 	</target>
 
 	<!-- Clean -->
-	<target name="clean" depends="BuildCraft.clean">
+	<target name="clean">
 		<delete file="jenkins.properties" failonerror="false" />
+		<delete dir="${build.dir}"/>
 	</target>
 
 	<!-- Setup -->
-	<target name="setup" depends="initialize-version,BuildCraft.setup,BuildCraft.copy-src">
+	<target name="setup" depends="initialize-version">
 		
 		<!-- Update MD5 otherwise we get all the buildcraft classes too :/ -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows" failonerror="true">
@@ -54,11 +155,11 @@
 
 	<!-- Copy source for use in eclipse to debug -->
 	<target name="copy-src-eclipse" depends="BuildCraft.copy-src">
-		<echo message="Installing ABO source for Eclipse"/>
+		<echo message="Installing ARG source for Eclipse"/>
 
-		<!-- Copy ABO source -->
+		<!-- Copy ARG source -->
 		<copy todir="${mcpsrc.dir}/minecraft">
-			<fileset dir="${abo.dir}/common">
+			<fileset dir="${arg.dir}/common">
 				<exclude name="**/*.bak"/>
 			</fileset>
 		</copy>
@@ -81,9 +182,9 @@
 			</fileset>
 		</copy>
 		
-		<!-- Copy abo resources to debug it -->
+		<!-- Copy arg resources to debug it -->
 		<copy todir="${mcpsrc.dir}/minecraft">
-			<fileset dir="${abo.dir}/resources">
+			<fileset dir="${arg.dir}/resources">
 				<exclude name="**/*.psd"/>
 				<exclude name="build.xml"/>
 				<exclude name="build.number"/>
@@ -94,26 +195,25 @@
 
 	<!-- Copy source for packaging -->
 	<target name="copy-src">
-		<echo message="Installing ABO source"/>
+		<echo message="Installing ARG source"/>
 
-		<!-- Copy ABO source -->
+		<!-- Copy ARG source -->
 		<copy todir="${mcpsrc.dir}/minecraft">
-			<fileset dir="${abo.dir}/common">
+			<fileset dir="${arg.dir}/common">
 				<exclude name="**/*.bak"/>
 			</fileset>
 			<filterset>
-				<filter token="ABO_VERSION" value="${abo.version}" />
+				<filter token="ARG_VERSION" value="${arg.version}" />
 				<filter token="BUILD_NUMBER" value="${build.number}" />
 				<filter token="MINECRAFT_VERSION" value="${mc.version}" />
-				<filter token="BUILDCRAFT_VERSION" value="${bc.version}" />
 				<filter token="FORGE_VERSION" value="${forge.version}" />
 			</filterset>
 		</copy>
 	</target>
 	
-	<!-- compile abo -->
+	<!-- compile arg -->
 	<target name="compile">
-		<echo message="Compiling ABO"/>
+		<echo message="Compiling ARG"/>
 
 		<!-- Recompile -->
 		<exec dir="${mcp.dir}" executable="cmd" osfamily="windows" failonerror="true">
@@ -157,14 +257,14 @@
 	<target name="copy">
 		<echo message="Copying build results"/>
 
-		<!-- Copy ABO classes -->
+		<!-- Copy ARG classes -->
 		<copy todir="${classes.dir}">
 			<fileset dir="${mcp.dir}/reobf/minecraft"/>
 		</copy>
 
 		<!-- Copy resources -->
 		<copy todir="${classes.dir}">
-			<fileset dir="${abo.dir}/resources">
+			<fileset dir="${arg.dir}/resources">
 				<exclude name="**/*.psd"/>
 				<exclude name="build.xml"/>
 				<exclude name="build.number"/>
@@ -172,24 +272,18 @@
 		</copy>
 	</target>
 	
-	<!-- create abo package -->
+	<!-- create arg package -->
 	<target name="package">
 		<echo message="Creating JAR"/>
 		
-		<jar destfile="${jar.dir}/buildcraft-Z-additional-buildcraft-objects-${abo.version.full}.jar" basedir="${classes.dir}"/>
+		<jar destfile="${jar.dir}/buildcraft-Z-additional-buildcraft-objects-${arg.version.full}.jar" basedir="${classes.dir}"/>
 
 		<!-- Reset src dir to post-forge-install state -->
-		<delete dir="${mcpsrc.dir}/minecraft/gfx/abo"/>
-		<delete dir="${mcpsrc.dir}/minecraft/gfx/buildcraft"/>
-		<delete dir="${mcpsrc.dir}/minecraft/abo"/>
-		<delete dir="${mcpsrc.dir}/minecraft/buildcraft"/>
-		<delete dir="${mcpsrc.dir}/minecraft/lang/abo"/>
-		<delete dir="${mcpsrc.dir}/minecraft/lang/buildcraft"/>
-		<delete dir="${mcpsrc.dir}/minecraft/changelog"/>
+		<delete dir="${mcpsrc.dir}/minecraft/arg"/>
 	</target>
 	
 	<target name="main" depends="clean,setup,copy-src,compile,copy,package">
-		<echo message="Finished building ABO"/>
+		<echo message="Finished building ARG"/>
 	</target>
 
 </project>
