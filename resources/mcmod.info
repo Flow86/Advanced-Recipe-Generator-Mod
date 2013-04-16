@@ -1,0 +1,16 @@
+[
+{
+  "modid": "Advanced-Recipe-Generator",
+  "name": "Advanced-Recipe-Generator",
+  "description": "Generating Recipe Images on start of Minecraft.",
+  "version": "",
+  "credits": "Created by Flow86",
+  "logoFile": "/common/arg/logo.png",
+  "mcversion": "",
+  "url": "https://github.com/Flow86/Advanced-Recipe-Generator-Mod",
+  "updateUrl": "",
+  "authors": [ "Flow86" ],
+  "parent":"",
+  "screenshots": [],
+}
+]

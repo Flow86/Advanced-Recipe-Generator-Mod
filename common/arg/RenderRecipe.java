@@ -41,11 +41,6 @@ class RenderRecipe extends GuiContainer {
 	public String name;
 	private final HashMap<String, ItemStack> incredientList = new HashMap<String, ItemStack>();
 
-	// private final int frameBufferId =
-	// EXTFramebufferObject.glGenFramebuffersEXT();
-	// private final int renderBufferId =
-	// EXTFramebufferObject.glGenRenderbuffersEXT();
-
 	public RenderRecipe(String name) {
 		super(new ContainerCraft());
 		this.name = name;
@@ -205,8 +200,8 @@ class RenderRecipe extends GuiContainer {
 
 		File file = new File(Minecraft.getMinecraftDir(), "recipes/" + name + ".png");
 
-		// if (file.exists())
-		// return;
+		if (file.exists())
+			return;
 
 		GL11.glPushMatrix();
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
