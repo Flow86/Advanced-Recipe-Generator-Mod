@@ -37,7 +37,7 @@ import org.lwjgl.opengl.GL12;
 
 import buildcraft.core.utils.StringUtil;
 
-class Render extends GuiContainer {
+class RenderRecipe extends GuiContainer {
 	public String name;
 	private final HashMap<String, ItemStack> incredientList = new HashMap<String, ItemStack>();
 
@@ -46,7 +46,7 @@ class Render extends GuiContainer {
 	// private final int renderBufferId =
 	// EXTFramebufferObject.glGenRenderbuffersEXT();
 
-	public Render(String name) {
+	public RenderRecipe(String name) {
 		super(new ContainerCraft());
 		this.name = name;
 		mc = Minecraft.getMinecraft();
@@ -183,7 +183,7 @@ class Render extends GuiContainer {
 			if (incredientList.size() < 3 ? false : (item == incredientList.size() / 2))
 				y = baseY;
 
-			fontRenderer.drawString(entry.getKey(), x + 18, y + 4, 0x404040);
+			fontRenderer.drawString(fontRenderer.trimStringToWidth(entry.getKey(), (int) ((100 - 10 - 18) * (1F / scale))), x + 18, y + 4, 0x404040);
 			drawItemStackAtPosition(entry.getValue(), x, y);
 			y += 18;
 			item++;

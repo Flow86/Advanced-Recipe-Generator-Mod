@@ -13,8 +13,6 @@
 package arg;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -23,14 +21,10 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeFireworks;
 import net.minecraft.item.crafting.RecipesArmorDyes;
 import net.minecraft.item.crafting.RecipesMapCloning;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -87,18 +81,18 @@ public class ARG {
 					continue;
 				}
 
-				Render render = new Render(irecipe.getRecipeOutput().getDisplayName());
+				RenderRecipe render = new RenderRecipe(irecipe.getRecipeOutput().getDisplayName());
 
 				ItemStack[] recipeInput = null;
 				try {
-					recipeInput = getRecipeArray(irecipe);
+					recipeInput = RecipeHelper.getRecipeArray(irecipe);
 					if (recipeInput == null)
 						continue;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
-				for (int i = 0; i < irecipe.getRecipeSize(); ++i)
+				for (int i = 0; i < recipeInput.length - 1; ++i)
 					render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
 
 				render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
@@ -110,126 +104,5 @@ public class ARG {
 			evt.map.getTexture().getTextureData().put(buff);
 			evt.map.getTexture().getTextureData().position(position);
 		}
-	}
-
-	private ItemStack[] getRecipeArray(IRecipe irecipe) throws IllegalArgumentException, SecurityException, NoSuchFieldException {
-		if (irecipe.getRecipeSize() > 9) {
-			return null;
-		}
-		ItemStack[] recipeArray = new ItemStack[10];
-		recipeArray[0] = irecipe.getRecipeOutput();
-
-		if ((irecipe instanceof ShapedRecipes)) {
-			ShapedRecipes shapedRecipe = (ShapedRecipes) irecipe;
-
-			ItemStack[] recipeInput = shapedRecipe.recipeItems;
-
-			for (int slot = 0; slot < recipeInput.length; slot++) {
-				ItemStack item = recipeInput[slot];
-
-				if ((item != null) && ((item.getItemDamage() == -1) || (item.getItemDamage() == 32767))) {
-					item = item.copy();
-					item.setItemDamage(0);
-				}
-
-				int x = slot % shapedRecipe.recipeWidth;
-				int y = slot / shapedRecipe.recipeWidth;
-				recipeArray[(x + y * shapedRecipe.recipeHeight) + 1] = item;
-			}
-
-		} else if ((irecipe instanceof ShapelessRecipes)) {
-			ShapelessRecipes shapelessRecipe = (ShapelessRecipes) irecipe;
-
-			List recipeInput = shapelessRecipe.recipeItems;
-
-			for (int slot = 0; slot < recipeInput.size(); slot++) {
-				ItemStack item = (ItemStack) recipeInput.get(slot);
-
-				if ((item != null) && (item.getItemDamage() == -1)) {
-					item = item.copy();
-					item.setItemDamage(0);
-				}
-
-				recipeArray[slot + 1] = item;
-			}
-
-		} else if ((irecipe instanceof ShapedOreRecipe)) {
-			ShapedOreRecipe shapedOreRecipe = (ShapedOreRecipe) irecipe;
-
-			Object[] recipeInput = shapedOreRecipe.getInput();
-
-			for (int slot = 0; slot < recipeInput.length; slot++) {
-				Object recipeSlot = recipeInput[slot];
-
-				if (recipeSlot == null)
-					continue;
-
-				if (recipeSlot instanceof ArrayList) {
-					ArrayList list = (ArrayList) recipeSlot;
-					if (list.size() > 1) {
-						System.out.println("ERROR: Slot-Array " + (slot + 1) + " has more then one item: " + list);
-						return null;
-					}
-					recipeSlot = list.get(0);
-				}
-
-				if (recipeSlot instanceof ItemStack) {
-					ItemStack item = (ItemStack) recipeSlot;
-
-					if ((item != null) && (item.getItemDamage() == -1)) {
-						item = item.copy();
-						item.setItemDamage(0);
-					}
-
-					recipeArray[slot + 1] = item;
-
-				} else {
-					System.out.println("Slot " + (slot + 1) + " is type " + recipeSlot.getClass().getSimpleName());
-					return null;
-				}
-			}
-
-		} else if ((irecipe instanceof ShapelessOreRecipe)) {
-			ShapelessOreRecipe shapelessOreRecipe = (ShapelessOreRecipe) irecipe;
-
-			List recipeInput = shapelessOreRecipe.getInput();
-
-			for (int slot = 0; slot < recipeInput.size(); slot++) {
-				Object recipeSlot = recipeInput.get(slot);
-
-				if (recipeSlot == null)
-					continue;
-
-				if (recipeSlot instanceof ArrayList) {
-					ArrayList list = (ArrayList) recipeSlot;
-					if (list.size() > 1) {
-						System.out.println("ERROR: Slot-Array " + (slot + 1) + " has more then one item: " + list);
-						return null;
-					}
-					recipeSlot = list.get(0);
-				}
-
-				if (recipeSlot instanceof ItemStack) {
-					ItemStack item = (ItemStack) recipeSlot;
-
-					if ((item != null) && (item.getItemDamage() == -1)) {
-						item = item.copy();
-						item.setItemDamage(0);
-					}
-
-					recipeArray[slot + 1] = item;
-
-				} else {
-					System.out.println("Slot " + (slot + 1) + " is type " + recipeSlot.getClass().getSimpleName());
-					return null;
-				}
-			}
-
-		} else {
-			System.out.println("Unknown Type: " + irecipe.getClass().getSimpleName());
-			return null;
-		}
-
-		return recipeArray;
 	}
 }
