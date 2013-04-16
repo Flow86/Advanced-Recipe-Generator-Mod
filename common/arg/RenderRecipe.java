@@ -264,7 +264,7 @@ class RenderRecipe extends GuiContainer {
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		this.mc.renderEngine.bindTexture("/arg/crafting.png");
+		this.mc.renderEngine.bindTexture("/gfx/arg/crafting.png");
 		drawTexturedModalRect(0, 0, 0, 0, xSize, ySize);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
