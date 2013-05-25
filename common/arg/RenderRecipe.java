@@ -174,11 +174,15 @@ class RenderRecipe extends GuiContainer {
 		int y = baseY;
 		for (Entry<String, ItemStack> entry : incredientList.entrySet()) {
 
-			int x = baseX[incredientList.size() < 3 ? 0 : (item < incredientList.size() / 2 ? 0 : 1)];
-			if (incredientList.size() < 3 ? false : (item == incredientList.size() / 2))
+			int x = baseX[incredientList.size() < 5 ? 0 : (item < incredientList.size() / 2 ? 0 : 1)];
+			if (incredientList.size() < 5 ? false : (item == incredientList.size() / 2))
 				y = baseY;
 
-			fontRenderer.drawString(fontRenderer.trimStringToWidth(entry.getKey(), (int) ((100 - 10 - 18) * (1F / scale))), x + 18, y + 4, 0x404040);
+			String name = entry.getKey();
+			if (incredientList.size() >= 5)
+				name = fontRenderer.trimStringToWidth(name, (int) ((100 - 10 - 18) * (1F / scale)));
+
+			fontRenderer.drawString(name, x + 18, y + 4, 0x404040);
 			drawItemStackAtPosition(entry.getValue(), x, y);
 			y += 18;
 			item++;
@@ -198,6 +202,7 @@ class RenderRecipe extends GuiContainer {
 			throw new RuntimeException("The recipes directory could not be created: " + dir);
 		}
 
+		name = name.replace(" ", "");
 		File file = new File(Minecraft.getMinecraftDir(), "recipes/" + name + ".png");
 
 		if (file.exists())
