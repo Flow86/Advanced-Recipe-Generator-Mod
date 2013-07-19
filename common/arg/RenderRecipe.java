@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -197,16 +198,16 @@ class RenderRecipe extends GuiContainer {
 
 	public void draw() {
 
-		File dir = new File(Minecraft.getMinecraftDir(), "recipes");
+		File dir = new File(Minecraft.getMinecraft().mcDataDir, "recipes");
 		if (!dir.exists() && !dir.mkdirs()) {
 			throw new RuntimeException("The recipes directory could not be created: " + dir);
 		}
 
 		name = name.replace(" ", "");
-		File file = new File(Minecraft.getMinecraftDir(), "recipes/" + name + ".png");
+		File file = new File(Minecraft.getMinecraft().mcDataDir, "recipes/" + name + ".png");
 
-		if (file.exists())
-			return;
+		//if (file.exists())
+		//	return;
 
 		GL11.glPushMatrix();
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -257,7 +258,7 @@ class RenderRecipe extends GuiContainer {
 				image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
 			}
 		}
-
+		
 		try {
 			ImageIO.write(image, "png", file);
 		} catch (Exception e) {
@@ -269,7 +270,7 @@ class RenderRecipe extends GuiContainer {
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		this.mc.renderEngine.bindTexture("/gfx/arg/crafting.png");
+		this.mc.renderEngine.func_110577_a(new ResourceLocation("Advanced-Recipe-Generator:textures/gui/crafting.png"));
 		drawTexturedModalRect(0, 0, 0, 0, xSize, ySize);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}

@@ -50,11 +50,8 @@ public class ARG {
 	@ForgeSubscribe(priority = EventPriority.LOWEST)
 	@SideOnly(Side.CLIENT)
 	public void createRecipeImages(TextureStitchEvent.Post evt) {
-
-		if (evt.map == Minecraft.getMinecraft().renderEngine.textureMapBlocks)
-			mapLoaded[0]++;
-		if (evt.map == Minecraft.getMinecraft().renderEngine.textureMapItems)
-			mapLoaded[1]++;
+		
+		mapLoaded[evt.map.textureType]++;
 
 		System.out.println("mapLoaded: " + mapLoaded[0] + ", " + mapLoaded[1] + " => " + mapGenerated);
 
@@ -65,10 +62,10 @@ public class ARG {
 
 			System.out.println("Generating Recipes!");
 
-			int position = evt.map.getTexture().getTextureData().position();
-			ByteBuffer buff = evt.map.getTexture().getTextureData().duplicate();
+			//int position = evt.map.getTexture().getTextureData().position();
+			//ByteBuffer buff = evt.map.getTexture().getTextureData().duplicate();
 
-			evt.map.getTexture().uploadTexture();
+			//evt.map.getTexture().uploadTexture();
 
 			for (Object orecipe : CraftingManager.getInstance().getRecipeList()) {
 				IRecipe irecipe = (IRecipe) orecipe;
@@ -100,9 +97,9 @@ public class ARG {
 
 			}
 
-			evt.map.getTexture().getTextureData().clear();
-			evt.map.getTexture().getTextureData().put(buff);
-			evt.map.getTexture().getTextureData().position(position);
+			//evt.map.getTexture().getTextureData().clear();
+			//evt.map.getTexture().getTextureData().put(buff);
+			//evt.map.getTexture().getTextureData().position(position);
 		}
 	}
 }
