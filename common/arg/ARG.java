@@ -13,14 +13,20 @@
 package arg;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeFireworks;
 import net.minecraft.item.crafting.RecipesArmorDyes;
 import net.minecraft.item.crafting.RecipesMapCloning;
+import net.minecraft.src.ModLoader;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.EventPriority;
@@ -62,10 +68,14 @@ public class ARG {
 
 			System.out.println("Generating Recipes!");
 
-			//int position = evt.map.getTexture().getTextureData().position();
-			//ByteBuffer buff = evt.map.getTexture().getTextureData().duplicate();
+			TextureManager tm = Minecraft.getMinecraft().func_110434_K();
+			
+			// save since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
+			Map field_110585_a = ModLoader.getPrivateValue(TextureManager.class, tm, "field_110585_a");
 
-			//evt.map.getTexture().uploadTexture();
+			Map new_field_110585_a = Maps.newHashMap();
+			new_field_110585_a.putAll(field_110585_a);
+			ModLoader.setPrivateValue(TextureManager.class, tm, "field_110585_a", new_field_110585_a);
 
 			for (Object orecipe : CraftingManager.getInstance().getRecipeList()) {
 				IRecipe irecipe = (IRecipe) orecipe;
@@ -97,9 +107,10 @@ public class ARG {
 
 			}
 
-			//evt.map.getTexture().getTextureData().clear();
-			//evt.map.getTexture().getTextureData().put(buff);
-			//evt.map.getTexture().getTextureData().position(position);
+			// restore map since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
+			ModLoader.setPrivateValue(TextureManager.class, tm, "field_110585_a", field_110585_a);
+			
+			System.out.println("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
 		}
 	}
 }

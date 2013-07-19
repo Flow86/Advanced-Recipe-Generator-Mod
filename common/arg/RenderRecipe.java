@@ -75,22 +75,22 @@ class RenderRecipe extends GuiContainer {
 	@Override
 	public void drawScreen(int par1, int par2, float par3) {
 		this.drawDefaultBackground();
-		int k = this.guiLeft;
-		int l = this.guiTop;
-		this.drawGuiContainerBackgroundLayer(par3, par1, par2);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		RenderHelper.disableStandardItemLighting();
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		RenderHelper.enableGUIStandardItemLighting();
-		GL11.glPushMatrix();
-		GL11.glTranslatef(k, l, 0.0F);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		short short1 = 240;
-		short short2 = 240;
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, short1 / 1.0F, short2 / 1.0F);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        int k = this.guiLeft;
+        int l = this.guiTop;
+        this.drawGuiContainerBackgroundLayer(par3, par1, par2);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        RenderHelper.disableStandardItemLighting();
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        RenderHelper.enableGUIStandardItemLighting();
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float)k, (float)l, 0.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        short short1 = 240;
+        short short2 = 240;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)short1 / 1.0F, (float)short2 / 1.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		int i1;
 
 		// crafting result
@@ -206,8 +206,8 @@ class RenderRecipe extends GuiContainer {
 		name = name.replace(" ", "");
 		File file = new File(Minecraft.getMinecraft().mcDataDir, "recipes/" + name + ".png");
 
-		//if (file.exists())
-		//	return;
+		if (file.exists())
+			return;
 
 		GL11.glPushMatrix();
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -270,8 +270,8 @@ class RenderRecipe extends GuiContainer {
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		this.mc.renderEngine.func_110577_a(new ResourceLocation("Advanced-Recipe-Generator:textures/gui/crafting.png"));
+		this.mc.renderEngine.func_110577_a(new ResourceLocation("advanced-recipe-generator", "textures/gui/crafting.png"));
 		drawTexturedModalRect(0, 0, 0, 0, xSize, ySize);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 }
