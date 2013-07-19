@@ -1,7 +1,7 @@
 <project name="Advanced-Recipe-Generator" basedir="../" default="main">
 	<property environment="env" />
 
-	<property name="arg.version"            value="0.0.1"/>
+	<property name="arg.version"            value="0.0.2"/>
 	<property name="arg.dir"                value="Advanced-Recipe-Generator"/>
 	
 	<property name="build.dir" value="build"/>
@@ -13,8 +13,8 @@
 	<property name="mcp.dir" value="${forge.dir}/mcp"/>
 	<property name="mcpsrc.dir" value="${mcp.dir}/src"/>
 
-	<property name="mc.version" value="1.5.2"/>
-	<property name="forge.version" value="7.8.0.686"/>
+	<property name="mc.version" value="1.6.2"/>
+	<property name="forge.version" value="9.10.0.790"/>
 
 	<property name="forge.name" value="minecraftforge-src-${mc.version}-${forge.version}.zip"/>
 

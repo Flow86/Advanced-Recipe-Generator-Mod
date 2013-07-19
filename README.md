@@ -1,6 +1,6 @@
 # Advanced Recipe Generator
 
-   ![Advanced Recipe Generator](resources/gfx/arg/logo.png "Advanced Recipe Generator")
+   ![Advanced Recipe Generator](resources/assets/advanced-recipe-generator/logo.png "Advanced Recipe Generator")
 
    Download Links:   http://www.siedler25.org/uploads/minecraft/AdvancedRecipeGenerator/
 
@@ -10,7 +10,7 @@
 
    This mod creates recipe images in the form
    
-   ![Sample Recipe](resources/gfx/arg/crafting.png "Sample Recipe")
+   ![Sample Recipe](resources/assets/advanced-recipe-generator/textures/gui/crafting.png "Sample Recipe")
    
    on start of minecraft.
    
