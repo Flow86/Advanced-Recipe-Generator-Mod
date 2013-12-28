@@ -3,7 +3,7 @@
   "modid": "Advanced-Recipe-Generator",
   "name": "Advanced-Recipe-Generator",
   "description": "Generating Recipe Images on start of Minecraft.",
-  "version": "",
+  "version": "${version}",
   "credits": "Created by Flow86",
   "logoFile": "/gfx/arg/logo.png",
   "mcversion": "",

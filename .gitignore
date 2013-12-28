@@ -1,1 +1,10 @@
-*.bak
+/*
+!/.gitignore
+!/src
+!/gradle
+!/gradlew
+!/gradlew.bat
+!/README.md
+!/checkin.bat
+!/checkout.bat
+!/build.bat
