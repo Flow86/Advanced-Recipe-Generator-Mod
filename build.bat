@@ -1,2 +1,1 @@
 gradlew clean setupCIWorkSpace build
-PAUSE

@@ -32,6 +32,7 @@ import com.google.common.collect.Maps;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
@@ -76,11 +77,11 @@ public class ARG
 
 			// save since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
 
-			Map mapTextureObjects = ReflectionHelper.getPrivateValue(TextureManager.class, tm, "mapTextureObjects");
+			Map mapTextureObjects = ObfuscationReflectionHelper.getPrivateValue(TextureManager.class, tm, "mapTextureObjects", "field_110585_a");
 
 			Map new_mapTextureObjects = Maps.newHashMap();
 			new_mapTextureObjects.putAll(mapTextureObjects);
-			ReflectionHelper.setPrivateValue(TextureManager.class, tm, new_mapTextureObjects, "mapTextureObjects");
+			ObfuscationReflectionHelper.setPrivateValue(TextureManager.class, tm, new_mapTextureObjects, "mapTextureObjects", "field_110585_a");
 
 			for (Object orecipe : CraftingManager.getInstance().getRecipeList())
 			{
@@ -108,19 +109,21 @@ public class ARG
 					e.printStackTrace();
 				}
 
-				try{
-				for (int i = 0; i < recipeInput.length - 1; ++i)
-					render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
+				try
+				{
+					for (int i = 0; i < recipeInput.length - 1; ++i)
+						render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
 
-				render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
-				render.draw();
-				}catch(Exception e){
+					render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
+					render.draw();
+				} catch (Exception e)
+				{
 					e.printStackTrace();
 				}
 			}
 
 			// restore map since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
-			ReflectionHelper.setPrivateValue(TextureManager.class, tm, mapTextureObjects, "mapTextureObjects");
+			ObfuscationReflectionHelper.setPrivateValue(TextureManager.class, tm, mapTextureObjects, "mapTextureObjects", "field_110585_a");
 
 			System.out.println("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
 		}

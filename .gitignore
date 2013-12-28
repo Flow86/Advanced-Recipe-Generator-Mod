@@ -5,4 +5,6 @@
 !/gradlew
 !/gradlew.bat
 !/README.md
-!/License.txt
+!/checkin.bat
+!/checkout.bat
+!/build.bat
