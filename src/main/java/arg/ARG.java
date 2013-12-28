@@ -12,14 +12,10 @@
 
 package arg;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
@@ -31,59 +27,71 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
+
+import com.google.common.collect.Maps;
+
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.Init;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @Mod(modid = "Advanced-Recipe-Generator", name = "Advanced-Recipe-Generator", version = "@ARG_VERSION@")
-public class ARG {
+public class ARG
+{
 	public static final String VERSION = "@ARG_VERSION@";
 
 	@Instance("Advanced-Recipe-Generator")
 	public static ARG instance;
 
-	@Init
-	public void load(FMLInitializationEvent evt) {
+	@EventHandler
+	public void load(FMLInitializationEvent evt)
+	{
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
-	public static int[] mapLoaded = { 0, 0 };
+	public static int[] mapLoaded =
+	{ 0, 0 };
 	public static boolean mapGenerated = false;
 
 	@ForgeSubscribe(priority = EventPriority.LOWEST)
 	@SideOnly(Side.CLIENT)
-	public void createRecipeImages(TextureStitchEvent.Post evt) {
-		
+	public void createRecipeImages(TextureStitchEvent.Post evt)
+	{
+
 		mapLoaded[evt.map.textureType]++;
 
 		System.out.println("mapLoaded: " + mapLoaded[0] + ", " + mapLoaded[1] + " => " + mapGenerated);
 
-		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1]) {
+		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1])
+		{
 			if (mapGenerated)
 				return;
 			mapGenerated = true;
 
 			System.out.println("Generating Recipes!");
 
-			TextureManager tm = Minecraft.getMinecraft().func_110434_K();
-			
+			TextureManager tm = Minecraft.getMinecraft().getTextureManager();
+
 			// save since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
-			Map field_110585_a = ModLoader.getPrivateValue(TextureManager.class, tm, "field_110585_a");
 
-			Map new_field_110585_a = Maps.newHashMap();
-			new_field_110585_a.putAll(field_110585_a);
-			ModLoader.setPrivateValue(TextureManager.class, tm, "field_110585_a", new_field_110585_a);
+			Map mapTextureObjects = ReflectionHelper.getPrivateValue(TextureManager.class, tm, "mapTextureObjects");
 
-			for (Object orecipe : CraftingManager.getInstance().getRecipeList()) {
+			Map new_mapTextureObjects = Maps.newHashMap();
+			new_mapTextureObjects.putAll(mapTextureObjects);
+			ReflectionHelper.setPrivateValue(TextureManager.class, tm, new_mapTextureObjects, "mapTextureObjects");
+
+			for (Object orecipe : CraftingManager.getInstance().getRecipeList())
+			{
 				IRecipe irecipe = (IRecipe) orecipe;
 
 				if ((irecipe instanceof RecipesArmorDyes) || (irecipe instanceof RecipeFireworks) || (irecipe instanceof RecipesMapCloning))
 					continue;
 
-				if (irecipe.getRecipeOutput() == null) {
+				if (irecipe.getRecipeOutput() == null)
+				{
 					System.out.println("Skip recipe without output: " + irecipe.getClass().getSimpleName());
 					continue;
 				}
@@ -91,25 +99,30 @@ public class ARG {
 				RenderRecipe render = new RenderRecipe(irecipe.getRecipeOutput().getDisplayName());
 
 				ItemStack[] recipeInput = null;
-				try {
+				try
+				{
 					recipeInput = RecipeHelper.getRecipeArray(irecipe);
 					if (recipeInput == null)
 						continue;
-				} catch (Exception e) {
+				} catch (Exception e)
+				{
 					e.printStackTrace();
 				}
 
+				try{
 				for (int i = 0; i < recipeInput.length - 1; ++i)
 					render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
 
 				render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
 				render.draw();
-
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 			}
 
 			// restore map since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
-			ModLoader.setPrivateValue(TextureManager.class, tm, "field_110585_a", field_110585_a);
-			
+			ReflectionHelper.setPrivateValue(TextureManager.class, tm, mapTextureObjects, "mapTextureObjects");
+
 			System.out.println("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
 		}
 	}
