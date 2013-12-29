@@ -23,6 +23,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class RecipeHelper {
+	@SuppressWarnings("rawtypes")
 	public static ItemStack[] getRecipeArray(IRecipe irecipe) throws IllegalArgumentException, SecurityException, NoSuchFieldException {
 		if (irecipe.getRecipeSize() > 9) {
 			return null;

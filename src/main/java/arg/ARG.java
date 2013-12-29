@@ -36,13 +36,11 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @Mod(modid = ARG.NAME, name = ARG.NAME, version = ARG.VERSION)
-public class ARG
-{
+public class ARG {
 	public static final String NAME = "Advanced-Recipe-Generator";
 	public static final String VERSION = "${version}";
 
@@ -51,13 +49,11 @@ public class ARG
 
 	public static Logger argLog = Logger.getLogger(NAME);
 
-
-	public static int[] mapLoaded =	{ 0, 0 };
+	public static int[] mapLoaded = { 0, 0 };
 	public static boolean mapGenerated = false;
 
 	@EventHandler
-	public void load(FMLInitializationEvent evt)
-	{
+	public void load(FMLInitializationEvent evt) {
 		argLog.setParent(FMLLog.getLogger());
 		argLog.info("Starting " + NAME + " #${buildnumber} " + VERSION + " (Built for Minecraft/Forge ${mc_apiversion}");
 		argLog.info("Copyright (c) Flow86, 2012-2014");
@@ -65,14 +61,13 @@ public class ARG
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@ForgeSubscribe(priority = EventPriority.LOWEST)
 	@SideOnly(Side.CLIENT)
-	public void createRecipeImages(TextureStitchEvent.Post evt)
-	{
+	public void createRecipeImages(TextureStitchEvent.Post evt) {
 		mapLoaded[evt.map.textureType]++;
 
-		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1])
-		{
+		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1]) {
 			if (mapGenerated)
 				return;
 			mapGenerated = true;
@@ -89,15 +84,13 @@ public class ARG
 			new_mapTextureObjects.putAll(mapTextureObjects);
 			ObfuscationReflectionHelper.setPrivateValue(TextureManager.class, tm, new_mapTextureObjects, "mapTextureObjects", "field_110585_a");
 
-			for (Object orecipe : CraftingManager.getInstance().getRecipeList())
-			{
+			for (Object orecipe : CraftingManager.getInstance().getRecipeList()) {
 				IRecipe irecipe = (IRecipe) orecipe;
 
 				if ((irecipe instanceof RecipesArmorDyes) || (irecipe instanceof RecipeFireworks) || (irecipe instanceof RecipesMapCloning))
 					continue;
 
-				if (irecipe.getRecipeOutput() == null)
-				{
+				if (irecipe.getRecipeOutput() == null) {
 					System.out.println("Skip recipe without output: " + irecipe.getClass().getSimpleName());
 					continue;
 				}
@@ -105,25 +98,21 @@ public class ARG
 				RenderRecipe render = new RenderRecipe(irecipe.getRecipeOutput().getDisplayName());
 
 				ItemStack[] recipeInput = null;
-				try
-				{
+				try {
 					recipeInput = RecipeHelper.getRecipeArray(irecipe);
 					if (recipeInput == null)
 						continue;
-				} catch (Exception e)
-				{
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
-				try
-				{
+				try {
 					for (int i = 0; i < recipeInput.length - 1; ++i)
 						render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
 
 					render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
 					render.draw();
-				} catch (Exception e)
-				{
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
