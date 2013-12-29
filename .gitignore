@@ -1,1 +1,4 @@
 *.bak
+.gradle/
+build/
+jenkins.properties

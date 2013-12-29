@@ -13,6 +13,7 @@
 package arg;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -29,6 +30,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 
 import com.google.common.collect.Maps;
 
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -38,32 +40,36 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Mod(modid = "Advanced-Recipe-Generator", name = "Advanced-Recipe-Generator", version = "@ARG_VERSION@")
+@Mod(modid = ARG.NAME, name = ARG.NAME, version = ARG.VERSION)
 public class ARG
 {
-	public static final String VERSION = "@ARG_VERSION@";
+	public static final String NAME = "Advanced-Recipe-Generator";
+	public static final String VERSION = "${version}";
 
 	@Instance("Advanced-Recipe-Generator")
 	public static ARG instance;
 
+	public static Logger argLog = Logger.getLogger(NAME);
+
+
+	public static int[] mapLoaded =	{ 0, 0 };
+	public static boolean mapGenerated = false;
+
 	@EventHandler
 	public void load(FMLInitializationEvent evt)
 	{
+		argLog.setParent(FMLLog.getLogger());
+		argLog.info("Starting " + NAME + " #${buildnumber} " + VERSION + " (Built for Minecraft/Forge ${mc_apiversion}");
+		argLog.info("Copyright (c) Flow86, 2012-2014");
+
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-
-	public static int[] mapLoaded =
-	{ 0, 0 };
-	public static boolean mapGenerated = false;
 
 	@ForgeSubscribe(priority = EventPriority.LOWEST)
 	@SideOnly(Side.CLIENT)
 	public void createRecipeImages(TextureStitchEvent.Post evt)
 	{
-
 		mapLoaded[evt.map.textureType]++;
-
-		System.out.println("mapLoaded: " + mapLoaded[0] + ", " + mapLoaded[1] + " => " + mapGenerated);
 
 		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1])
 		{
@@ -71,7 +77,7 @@ public class ARG
 				return;
 			mapGenerated = true;
 
-			System.out.println("Generating Recipes!");
+			argLog.info("Generating Recipes ...");
 
 			TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
@@ -125,7 +131,7 @@ public class ARG
 			// restore map since we get a ConcurrentModificationException in TextureManager.func_110549_a otherwise
 			ObfuscationReflectionHelper.setPrivateValue(TextureManager.class, tm, mapTextureObjects, "mapTextureObjects", "field_110585_a");
 
-			System.out.println("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
+			argLog.info("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
 		}
 	}
 }

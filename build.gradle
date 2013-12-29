@@ -17,26 +17,98 @@ apply plugin: 'java'
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
-group = 'flow86.advancedrecipegenerator'
-version = '0.0.3'
+///////////////////////////////////////////////////////////////////////////////
+
+group = 'com.github.flow86'
+ext.baseversion = '0.0.3'
 archivesBaseName = 'advancedrecipegenerator'
- 
-logger.lifecycle ""+version
- 
+
 minecraft {
     version = "1.6.4-9.11.1.964"
 }
 
-processResources
-{
+///////////////////////////////////////////////////////////////////////////////
+
+// set java compiler options to display warnings
+tasks.withType(Compile) {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
+// display files which get compiled
+compileJava {
+    options.listFiles = true
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// add build number to version
+def env = System.getenv()
+ext.buildnumber = ( env['BUILD_NUMBER'] ? env['BUILD_NUMBER'] : "custom" )
+
+version=ext.baseversion + "-" + ext.buildnumber
+
+logger.lifecycle "Building Advanced Recipe Generator " + ext.baseversion + "-" + ext.buildnumber + " for MC-Forge " + project.minecraft.apiVersion
+
+// generate property file for jenkins
+if(env['BUILD_NUMBER']) {
+    ant.propertyfile(file:"jenkins.properties", comment:'Build Properties') {
+        ant.entry(key:'version',value:version)
+        ant.entry(key:'mc.version',value:project.minecraft.version)
+        ant.entry(key:'forge.version',value:project.minecraft.apiVersion)
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// change version etc in source file, this was a bit complicated
+def filteredSourceDir = file("${buildDir}/filtered/java")
+
+sourceSets {
+    filtered {
+        java {
+            srcDirs = [ filteredSourceDir ]
+        }
+    }
+}
+
+// copy the main sources and filter any '$version' occurences.
+task processVersion (type: Copy) {
+    from sourceSets.main.java
+    into filteredSourceDir
+    
+    expand 'version'       : project.ext.baseversion, 
+           'buildnumber'   : project.ext.buildnumber, 
+           'mc_version'    : project.minecraft.version, 
+           'mc_apiversion' : project.minecraft.apiVersion
+}
+
+// we have to change input of "sourceMainJava" here to use changed source dir
+afterEvaluate {
+    sourceMainJava {
+        dependsOn processVersion
+        source = sourceSets.filtered.java
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// copy resource files
+processResources {
+    exclude "**/*.psd", "**/*.bak"
+
+    // text resources which getting filtered
     from(sourceSets.main.resources.srcDirs) {
         include '**/*.lang'
         include '**/*.info'
         include '**/*.properties'
 
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version'       : project.ext.baseversion, 
+               'buildnumber'   : project.ext.buildnumber, 
+               'mc_version'    : project.minecraft.version, 
+               'mc_apiversion' : project.minecraft.apiVersion
     }
 
+    // binary resources
     from(sourceSets.main.resources.srcDirs) {
         exclude '**/*.lang'
         exclude '**/*.info'
@@ -44,11 +116,25 @@ processResources
     }
 }
 
+jar {
+    appendix = 'universal'
+    
+    manifest {
+        attributes 'MCVersion' : project.minecraft.version
+        attributes 'Version'   : project.version
+    }
+}
+
 task deobfJar(type: Jar) {
-        from sourceSets.main.output
-        appendix = 'deobf'
+    from sourceSets.main.output
+    appendix = 'deobf'
+
+    manifest {
+        attributes 'MCVersion' : project.minecraft.version
+        attributes 'Version'   : project.version
+    }
 }
  
 artifacts {
-        archives deobfJar
+    archives deobfJar
 }
