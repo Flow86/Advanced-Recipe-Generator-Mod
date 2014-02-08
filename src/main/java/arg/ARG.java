@@ -15,8 +15,10 @@ package arg;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
@@ -36,6 +38,8 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -105,13 +109,26 @@ public class ARG {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
+				// Determine mod of this recipe.
+				UniqueIdentifier identifier = null;
+                identifier = getUniqueIdentifier(irecipe.getRecipeOutput());
+                int recipe = 0;
+                while(identifier == null && recipeInput != null && recipe < recipeInput.length) {
+                    ItemStack input = recipeInput[recipe];
+                    identifier = getUniqueIdentifier(input);
+                    recipe++;
+                }
+                String subFolder = "vanilla";
+                if(identifier != null)
+                   subFolder = identifier.modId;
 
 				try {
 					for (int i = 0; i < recipeInput.length - 1; ++i)
 						render.getCraftingContainer().craftMatrix.setInventorySlotContents(i, recipeInput[i + 1]);
 
 					render.getCraftingContainer().craftResult.setInventorySlotContents(0, recipeInput[0]);
-					render.draw();
+					render.draw(subFolder);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -122,5 +139,17 @@ public class ARG {
 
 			argLog.info("Finished Generation of Recipes in " + Minecraft.getMinecraft().mcDataDir + "/recipes/");
 		}
+	}
+	
+	private UniqueIdentifier getUniqueIdentifier(ItemStack itemStack) {
+	    if(itemStack == null || itemStack.getItem() == null)
+	        return null;
+	    if(itemStack.getItem() instanceof ItemBlock) {
+	        int blockId = ((ItemBlock)itemStack.getItem()).getBlockID();
+            Block block = Block.blocksList[blockId];
+	        return GameRegistry.findUniqueIdentifierFor(block);
+	    } else {
+	        return GameRegistry.findUniqueIdentifierFor(itemStack.getItem());
+	    }
 	}
 }
