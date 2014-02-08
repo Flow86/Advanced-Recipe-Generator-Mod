@@ -196,15 +196,15 @@ class RenderRecipe extends GuiContainer {
 
 	}
 
-	public void draw() {
+	public void draw(String subFolder) {
 
-		File dir = new File(Minecraft.getMinecraft().mcDataDir, "recipes");
+		File dir = new File(Minecraft.getMinecraft().mcDataDir, "recipes/" + subFolder);
 		if (!dir.exists() && !dir.mkdirs()) {
 			throw new RuntimeException("The recipes directory could not be created: " + dir);
 		}
 
 		name = name.replace(" ", "");
-		File file = new File(Minecraft.getMinecraft().mcDataDir, "recipes/" + name + ".png");
+		File file = new File(Minecraft.getMinecraft().mcDataDir, "recipes/" + subFolder + "/" + name + ".png");
 
 		if (file.exists())
 			return;
