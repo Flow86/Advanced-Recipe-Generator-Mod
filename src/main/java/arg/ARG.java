@@ -27,8 +27,6 @@ import net.minecraft.item.crafting.RecipesArmorDyes;
 import net.minecraft.item.crafting.RecipesMapCloning;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.EventPriority;
-import net.minecraftforge.event.ForgeSubscribe;
 
 import com.google.common.collect.Maps;
 
@@ -38,6 +36,8 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import cpw.mods.fml.relauncher.Side;
@@ -58,7 +58,6 @@ public class ARG {
 
 	@EventHandler
 	public void load(FMLInitializationEvent evt) {
-		argLog.setParent(FMLLog.getLogger());
 		argLog.info("Starting " + NAME + " #${buildnumber} " + VERSION + " (Built for Minecraft/Forge ${mc_apiversion}");
 		argLog.info("Copyright (c) Flow86, 2012-2014");
 
@@ -66,10 +65,10 @@ public class ARG {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@ForgeSubscribe(priority = EventPriority.LOWEST)
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	@SideOnly(Side.CLIENT)
 	public void createRecipeImages(TextureStitchEvent.Post evt) {
-		mapLoaded[evt.map.textureType]++;
+		mapLoaded[evt.map.getTextureType()]++;
 
 		if (mapLoaded[0] > 0 && mapLoaded[0] == mapLoaded[1]) {
 			if (mapGenerated)
@@ -145,8 +144,7 @@ public class ARG {
 	    if(itemStack == null || itemStack.getItem() == null)
 	        return null;
 	    if(itemStack.getItem() instanceof ItemBlock) {
-	        int blockId = ((ItemBlock)itemStack.getItem()).getBlockID();
-            Block block = Block.blocksList[blockId];
+            Block block = Block.getBlockFromItem(((ItemBlock)itemStack.getItem()));
 	        return GameRegistry.findUniqueIdentifierFor(block);
 	    } else {
 	        return GameRegistry.findUniqueIdentifierFor(itemStack.getItem());
