@@ -24,7 +24,7 @@ targetCompatibility = JavaVersion.VERSION_1_6
 ///////////////////////////////////////////////////////////////////////////////
 
 group = 'com.github.flow86'
-ext.baseversion = '0.0.3'
+ext.baseversion = '0.0.4'
 archivesBaseName = 'advancedrecipegenerator'
 
 minecraft {
